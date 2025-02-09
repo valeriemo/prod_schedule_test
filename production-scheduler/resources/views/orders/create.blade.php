@@ -55,9 +55,13 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Enter order</button>
+        <button type="submit" class="btn btn-primary">Place order</button>
     </form>
-    <a href="{{ route('schedule.index') }}" class="btn btn-secondary mt-3">View Production Schedule</a>
+
+    <div class="mt-4">
+        <a href="{{ route('schedule.index') }}" class="btn btn-secondary">View Production Schedule</a>
+        <a href="{{ route('welcome') }}" class="btn btn-secondary">🏠 Back Home</a>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -99,7 +103,6 @@
                 }
             });
         });
-        
     </script>
 
 </body>

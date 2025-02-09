@@ -6,7 +6,8 @@ use App\Http\Controllers\ProductionScheduleController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
+
 // Order
 Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');

@@ -10,7 +10,10 @@
     <div class="text-center">
         <h1 class="mb-4">Welcome</h1>
         <h2 class="mb-4">Laravel Production Scheduler 🚀</h2>
-        <a href="{{ route('orders.create') }}" class="btn btn-primary mt-3">Make an order</a>
+        <div class="mt-4">
+            <a href="{{ route('orders.create') }}" class="btn btn-primary">➕ Create New Order</a>
+            <a href="{{ route('schedule.index') }}" class="btn btn-secondary">View Production Schedule</a>
+        </div>
     </div>
 </body>
 </html>

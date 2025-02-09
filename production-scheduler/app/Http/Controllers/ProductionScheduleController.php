@@ -2,27 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Order;
+use Carbon\CarbonInterval;
 use Illuminate\Support\Carbon;
 
 class ProductionScheduleController extends Controller
 {
-
-        // ✔ Récupérer les commandes (orders) triées par date (need_by_date).
-        // ✔ Calculer le temps de production par produit en fonction de sa vitesse (production_speed).
-        // ✔ Gérer les délais de changement (changeover delay) entre les types de produits.
-        // ✔ Générer un planning avec les heures de début et de fin pour chaque commande.
-        // ✔ **Retourner les données à une vue schedule.blade.php.
-
-
-        // on va aller chercher les orders par orders->id 
-        // on va chercher les items associés a l'orders(id) avec sa quantité et son type
-
     public function index()
     {
         $orders = $this->getOrdersByDate();
         $schedule = $this->generateSchedule($orders);
+
         return view('schedule', compact('schedule'));
     }
 
@@ -31,53 +21,66 @@ class ProductionScheduleController extends Controller
         return Order::with('items.product')->orderBy('need_by_date')->get();
     }
 
-    private function calculateProductionTime($product)
-    {
-        return $product->quantity / $product->production_speed;
-    }
-
-    private function generateSchedule($orders){
-        $schedule = [];
-        $previousProduct = null;
-        $previousEndTime = Carbon::now();
-
-        foreach ($orders as $order) {
-            $currentItem = $order->items->first();
-
-                // Vérifier si la commande a au moins un item et un produit
-            if (!$currentItem || !$currentItem->product) {
-                continue; // Passer à l'ordre suivant si aucun produit n'est trouvé
-            }
-
-            $currentProduct = $order->items->first()->product;
-            $changeoverDelay = $this->getChangeoverDelay($previousProduct, $currentProduct);
-            $productionTime = $this->calculateProductionTime($currentProduct);
-
-            $startTime = $previousEndTime->addMinutes($changeoverDelay);
-            $endTime = $startTime->addMinutes($productionTime);
-
-            $schedule[] = [
-                'order_id' => $order->id,
-                'product' => $currentProduct->name,
-                'start_time' => $startTime,
-                'end_time' => $endTime
-            ];
-
-            $previousProduct = $currentProduct;
-            $previousEndTime = $endTime;
-        }
-
-        return $schedule;
-
-    }
-
     private function getChangeoverDelay($previousProduct, $currentProduct)
     {
+        $changeoverDelay = 30;
         if ($previousProduct === null) {
             return 0;
         }
 
-        return $previousProduct->type === $currentProduct->type ? 0 : $currentProduct->changeover_delay;
+        return ($previousProduct->type === $currentProduct->type) ? 0 : $changeoverDelay;
+    }
+
+    private function calculateProductionTime($product, $quantity)
+    {
+        if (!$product || $product->production_speed <= 0) {
+            return CarbonInterval::seconds(0); 
+        }
+        $productionSeconds = ($quantity / $product->production_speed) * 3600; 
+
+        return CarbonInterval::seconds($productionSeconds); 
+    }
+    
+    private function generateSchedule($orders){
+        $schedule = []; 
+        $previousProduct = null;
+        $previousEndTime = Carbon::now();
+    
+        foreach ($orders as $order) {
+            $currentItem = $order->items->first();
+    
+            if (!$currentItem || !$currentItem->product) {
+                continue;
+            }
+    
+            $quantity = $currentItem->quantity; 
+            $currentProduct = $currentItem->product; 
+            $dueDate = $order->need_by_date; 
+
+            $changeoverDelay = CarbonInterval::minutes($this->getChangeoverDelay($previousProduct, $currentProduct));
+            $hasChangeoverDelay = $changeoverDelay->totalSeconds > 0;
+            $productionTime = $this->calculateProductionTime($currentProduct, $quantity);
+    
+            $startTime = $previousEndTime->copy()->add($changeoverDelay);
+            $endTime = $startTime->copy()->add($productionTime);
+    
+
+            $schedule[] = [
+                'order_id' => $order->id,
+                'product' => $currentProduct->name,
+                'quantity' => $quantity,
+                'due_date' => Carbon::parse($dueDate)->format('Y-m-d'),
+                'production_time' => gmdate("H:i:s", $productionTime->totalSeconds), 
+                'start_time' => $startTime->format('H:i:s'), 
+                'end_time' => $endTime->format('H:i:s'),
+                'has_changeover_delay' => $hasChangeoverDelay,
+            ];
+    
+            $previousProduct = $currentProduct;
+            $previousEndTime = $endTime;
+        }
+    
+        return $schedule;
     }
 
 }
