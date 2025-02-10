@@ -1,8 +1,8 @@
 <?php
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Product;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
 class OrderRequest extends FormRequest
@@ -20,6 +20,15 @@ class OrderRequest extends FormRequest
             'product_ids'    => ['required', 'array'],
             'quantities'     => ['required', 'array'],
             'quantities.*'   => ['required', 'integer', 'min:1'], 
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'product_ids.required'  => 'Please select at least one product.',
+            'quantities.required'  => 'Please specify the quantity for each product.',
+            'quantities.*.min'      => 'The quantity for a product must be at least 1.',
         ];
     }
 

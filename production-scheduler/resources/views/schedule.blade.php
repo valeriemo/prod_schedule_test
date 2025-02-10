@@ -25,10 +25,10 @@
                         <th>Order ID</th>
                         <th>Product</th>
                         <th>Quantity</th>
-                        <th>Due Date</th>
                         <th>Production Time</th>
                         <th>Start Time</th>
                         <th>End Time</th>
+                        <th>Due Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,10 +42,10 @@
                         <td>{{ $item['order_id'] ?? '-' }}</td>
                         <td><strong>{{ $item['product'] }}</strong></td>
                         <td>{{ $item['quantity'] ?? '-' }}</td>
-                        <td>{{ $item['due_date'] ?? '-' }}</td>
                         <td>{{ $item['production_time'] }}</td>
                         <td>{{ $item['start_time'] }}</td>
                         <td>{{ $item['end_time'] }}</td>
+                        <td>{{ $item['due_date'] ?? '-' }}</td>
                     </tr>
                 @endforeach
             </tbody>
