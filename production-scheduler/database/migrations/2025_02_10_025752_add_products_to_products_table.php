@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up()
     {
-        DB::table('product')->insert([
+        DB::table('products')->insert([
             ['id' => 1, 'name' => 'Product A', 'type' => 1, 'production_speed' => 715, 'created_at' => now(), 'updated_at' => now()],
             ['id' => 2, 'name' => 'Product B', 'type' => 1, 'production_speed' => 715, 'created_at' => now(), 'updated_at' => now()],
             ['id' => 3, 'name' => 'Product C', 'type' => 2, 'production_speed' => 770, 'created_at' => now(), 'updated_at' => now()],
@@ -18,6 +18,6 @@ return new class extends Migration {
 
     public function down()
     {
-        DB::table('product')->whereIn('id', [1, 2, 3, 4, 5, 6])->delete();
+        DB::table('products')->whereIn('id', [1, 2, 3, 4, 5, 6])->delete();
     }
 };
